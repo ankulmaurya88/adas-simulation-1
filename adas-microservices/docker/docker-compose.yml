@@ -1,0 +1,76 @@
+version: "3.8"
+services:
+  mqtt:
+    image: eclipse-mosquitto:2.0
+    container_name: mqtt-broker
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+
+  tpms-service:
+    build: ../services/tpms-service
+    container_name: tpms-svc
+    environment:
+      - MQTT_HOST=mqtt
+      - MQTT_PORT=1883
+    depends_on:
+      - mqtt
+    ports:
+      - "8001:8001"
+
+  ldw-service:
+    build: ../services/ldw-service
+    container_name: ldw-svc
+    environment:
+      - MQTT_HOST=mqtt
+      - MQTT_PORT=1883
+    depends_on:
+      - mqtt
+    ports:
+      - "8002:8002"
+
+  acc-service:
+    build: ../services/acc-service
+    container_name: acc-svc
+    environment:
+      - MQTT_HOST=mqtt
+      - MQTT_PORT=1883
+    depends_on:
+      - mqtt
+    ports:
+      - "8003:8003"
+
+
+# services:
+#   tpms-service:
+#     build:
+#       context: ./services/tpms-service
+#       dockerfile: Dockerfile
+#     ports:
+#       - "5001:5000"
+#     volumes:
+#       - ./services/tpms-service:/app
+#     command: python app/main.py
+
+#   acc-service:
+#     build:
+#       context: ./services/acc-service
+#       dockerfile: Dockerfile
+#     ports:
+#       - "5002:5000"
+#     volumes:
+#       - ./services/acc-service:/app
+#     command: python app/main.py
+
+#   ldw-service:
+#     build:
+#       context: ./services/ldw-service
+#       dockerfile: Dockerfile
+#     ports:
+#       - "5003:5000"
+#     volumes:
+#       - ./services/ldw-service:/app
+#     command: python app/main.py
